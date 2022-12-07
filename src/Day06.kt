@@ -11,5 +11,5 @@ fun main() {
 }
 
 fun String.markerAfterDistinctChars(distinct: Int): Int {
-    return windowed(distinct, 1).withIndex().first { it.value.toSet().size == distinct }.index + distinct
+    return windowed(distinct, step = 1).withIndex().first { it.value.toSet().size == distinct }.index + distinct
 }

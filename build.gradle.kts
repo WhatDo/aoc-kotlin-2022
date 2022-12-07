@@ -17,3 +17,7 @@ tasks {
         gradleVersion = "7.6"
     }
 }
+
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:1.7.22")
+}
