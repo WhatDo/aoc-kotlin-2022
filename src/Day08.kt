@@ -52,7 +52,6 @@ private fun TreeEntry.isVisibleIn(grid: Grid): Boolean {
 }
 
 
-typealias Vec2 = Pair<Int, Int>
 typealias TreeMap = Map<Vec2, Int>
 typealias TreeEntry = Map.Entry<Vec2, Int>
 
