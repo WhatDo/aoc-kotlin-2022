@@ -1,4 +1,3 @@
-import kotlin.math.abs
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTime
 
@@ -8,7 +7,7 @@ fun main() {
     val graph = Graph.create(input)
 
     val time = measureTime {
-        val start = requireNotNull(graph.nodes.find { it.elevation == 'S' })
+        val start = requireNotNull(graph.nodes.find { it.value == 'S' })
         val stepsFromStart = bfs(graph, start)
         println("Steps from 'S' to 'E' = $stepsFromStart")
     }
@@ -16,7 +15,7 @@ fun main() {
     println("took $time")
 
     val time2 = measureTime {
-        val shortest = graph.nodes.filter { node -> node.elevation.asElevation() == 'a' }
+        val shortest = graph.nodes.filter { node -> node.value.asElevation() == 'a' }
             .map { bfs(graph, it) }
             .filter { it != -1 }
             .min()
@@ -36,7 +35,7 @@ private fun bfs(graph: Graph, start: Node): Int {
 
     while (queue.isNotEmpty()) {
         val (step, node) = queue.removeFirst()
-        if (node.elevation == 'E') {
+        if (node.value == 'E') {
             return step
         }
 
@@ -79,14 +78,14 @@ private class Graph(val nodes: List<Node>, val width: Int, val height: Int) {
 }
 
 
-private data class Node(val elevation: Char, val x: Int, val y: Int)
+private data class Node(val value: Char, val x: Int, val y: Int)
 
 private fun Node.neighbors(graph: Graph): List<Node> {
     return listOf(x - 1 to y, x + 1 to y, x to y - 1, x to y + 1)
         .mapNotNull { (x, y) -> graph.get(x, y) }
 }
 
-private fun Node.canGoTo(other: Node) = (elevation.asElevation() - other.elevation.asElevation()) >= -1
+private fun Node.canGoTo(other: Node) = (value.asElevation() - other.value.asElevation()) >= -1
 
 private fun Char.asElevation() =
     when (this) {
