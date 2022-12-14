@@ -40,6 +40,7 @@ fun main() {
     println(
         result10k.monkies.sortedBy { it.inspectionLevel }.takeLast(2)
             .fold(1L) { acc, monkey -> acc * monkey.inspectionLevel })
+    // 21816744824
 }
 
 private fun runMonkies(times: Int, state: MonkeyState, stressed: Boolean = false): MonkeyState {
@@ -57,14 +58,15 @@ private fun runMonkies(times: Int, state: MonkeyState, stressed: Boolean = false
 private fun runMonkey(state: MonkeyState, monkey: Monkey, withStress: Boolean): MonkeyState {
     val mutableMonkies = state.monkies.toMutableList()
     monkey.items.forEach { item ->
-        val worryItem = state.apply(op = monkey.op, item)
-        val relaxItem = if (!withStress) state.apply(op = Div(3), worryItem) else worryItem
-        val targetMonkey = if (relaxItem.worryLevel % monkey.test == 0L) {
+        var worryItem = apply(op = monkey.op, item)
+        worryItem = if (!withStress) apply(op = Div(3), worryItem) else worryItem
+        worryItem = apply(op = state.commonDivisor, worryItem)
+        val targetMonkey = if (worryItem.worryLevel % monkey.test == 0L) {
             monkey.trueTarget
         } else {
             monkey.falseTarget
         }
-        mutableMonkies[targetMonkey] = mutableMonkies[targetMonkey].run { copy(items = items + relaxItem) }
+        mutableMonkies[targetMonkey] = mutableMonkies[targetMonkey].run { copy(items = items + worryItem) }
     }
     mutableMonkies[monkey.idx] = monkey.copy(
         items = emptyList(),
@@ -76,7 +78,7 @@ private fun runMonkey(state: MonkeyState, monkey: Monkey, withStress: Boolean): 
 
 private data class MonkeyState(
     val monkies: List<Monkey>,
-    val commonDivisor: Int = monkies.fold(1) { acc, monkey -> acc * monkey.test }
+    val commonDivisor: WorryOp = Mod(monkies.fold(1) { acc, monkey -> acc * monkey.test })
 )
 
 private data class Monkey(
@@ -89,14 +91,15 @@ private data class Monkey(
     val items: List<Item> = emptyList(),
 )
 
-private fun MonkeyState.apply(op: WorryOp, item: Item): Item {
+private fun apply(op: WorryOp, item: Item): Item {
     return Item(
         when (op) {
             is Add -> item.worryLevel + (op.value)
             is Mult -> item.worryLevel * (op.factor)
             is Div -> item.worryLevel / (op.factor)
             Pow2 -> item.worryLevel * item.worryLevel
-        } % commonDivisor
+            is Mod -> item.worryLevel % op.factor
+        }
     )
 }
 
@@ -108,4 +111,5 @@ private sealed class WorryOp
 private data class Mult(val factor: Int) : WorryOp()
 private data class Add(val value: Int) : WorryOp()
 private data class Div(val factor: Int = 3) : WorryOp()
+private data class Mod(val factor: Int) : WorryOp()
 private object Pow2 : WorryOp()
